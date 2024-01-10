@@ -3,7 +3,7 @@ import logger from 'morgan';
 
 import drawRouter from './routes/draw';
 
-var app = express();
+const app = express();
 
 app.use(logger('dev'));
 app.use(express.json());
