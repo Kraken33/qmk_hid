@@ -45,9 +45,7 @@ router.post('/', async function (req: Request<{}, {}, UInt8t[]>, res, next) {
         hid.send
     );
 
-    console.log(weatherWidgetBytes);
-
-    sendWidget(0, clockWidgetBytes.length)(clockWidgetBytes);
+      sendWidget(0, clockWidgetBytes.length)(clockWidgetBytes);
 
     // setTimeout(()=>{
     //     sendWidget(27)(clockWidgetBytes);

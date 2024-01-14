@@ -1,5 +1,5 @@
 import Jimp from "jimp";
-import path from "node:path";
+import { join } from "node:path";
 import { Widget } from "../types/widget";
 
 const create = ({ width, height }: { width: number, height: number }) => {
@@ -7,11 +7,19 @@ const create = ({ width, height }: { width: number, height: number }) => {
 }
 
 const createImage = (path: string) => {
-    return Jimp.read(path);
+    return Jimp.read(join(__dirname, "../assets/images/", path));
 }
 
-const addText = (text: string) => async (widget: Widget) => {
-    const font = await Jimp.loadFont(path.join(__dirname, '../assets/fonts/Pixolletta8px.fnt'));
+const resize = (w: number, h: number)=>(widget: Widget)=>{
+    return widget.resize(w, h);
+}
+
+const scale = (w: number)=>(widget: Widget)=>{
+    return widget.scale(w);
+}
+
+const addText = (text: string, size: number = 10) => async (widget: Widget) => {
+    const font = await Jimp.loadFont(join(__dirname, `../assets/fonts/Pixolletta${size}.fnt`));
 
     return new Promise((res, rej) => {
         const width = Jimp.measureText(font, text);
@@ -36,7 +44,6 @@ const addText = (text: string) => async (widget: Widget) => {
 }
 
 const combine = (widget: Widget, x: number, y: number) => (targetWidget: Widget) => {
-    console.log(targetWidget, 'tw')
     return targetWidget.blit(widget, x, y);
 }
 
@@ -45,4 +52,6 @@ export default {
     createImage,
     addText,
     combine,
+    resize,
+    scale,
 }

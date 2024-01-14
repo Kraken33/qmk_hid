@@ -10,7 +10,6 @@ function parse(imageData) {
       for (i = 0; i < 8; i++) {
         y = line * 8 + i;
         b = imageData.getPixelColor(x, y) > 127 ? 1 : 0;
-        console.log(b);
         v |= (b << i);
       }
       data.push(v);

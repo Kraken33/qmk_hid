@@ -1,48 +1,61 @@
-import pipe from 'lodash/fp/pipe';
-import flatten from 'lodash/fp/flatten';
 import dayjs from 'dayjs';
-import { UInt8t } from './types/common';
-import bytes from './modules/bytes';
-import oled from './modules/oled';
-import hid from './modules/hid';
+import dotenv from 'dotenv';
 import widget from './modules/widget';
 import fp from './modules/fp';
-// @ts-ignore: Unreachable code error
-import imageModule from './modules/image';
-import path from 'node:path';
+import screen from './modules/screen';
+
+dotenv.config();
 
 (async function main() {
+    const fetchWeather = async () => {
+        return await ((await fetch(`http://api.weatherapi.com/v1/current.json?key=${process.env.WEATHER_API_KEY}&q=${process.env.WEATHER_API_LOCATION}&aqi=no`)).json());
+    }
 
-    setInterval(async () => {
-        const clockWidget = await fp.asyncPipe(
-            widget.create,
-            widget.addText(dayjs(Date.now()).format('HH:mm'))
-        )({ width: 32, height: 10 });
-
-        const dateWidget = await fp.asyncPipe(
-            widget.create,
-            widget.addText(dayjs(Date.now()).format('dd') + ' ' + dayjs(Date.now()).format('DD'))
-        )({ width: 32, height: 10 });
-        const weatherWidgetBytes = await widget.createImage(path.join(__dirname, './assets/images/moon1.png'));
-
-        const topWidget = await fp.asyncPipe(
-            widget.create,
-            widget.combine(weatherWidgetBytes, 0, 0),
-            widget.combine(dateWidget, 0, 32),
-            widget.combine(clockWidget, 0, 42),
-        )({ width: 32, height: 60 });
-
-
-        const clockWidgetBytes = imageModule.parse(topWidget);
-
-        const sendWidget = (y: UInt8t, size: number) => pipe(
-            bytes.chunk(31),
-            oled.addOledBufferCommandId2Chunks,
-            oled.addRenderBufferCommandPackage([0, y, bytes.int2Bytes(size)]),
-            flatten,
-            hid.send
-        );
-
-        sendWidget(0, clockWidgetBytes.length)(clockWidgetBytes);
-    }, 60_000);
+    screen.create([
+        {
+            x: 0,
+            y: 0,
+            state: {
+                time: dayjs(Date.now()).format('HH:mm')
+            },
+            effect(state) {
+                setInterval(() => {
+                    state.time = dayjs(Date.now()).format('HH:mm');
+                }, 60_000);
+            }, async render(state) {
+                return await fp.asyncPipe(
+                    widget.create,
+                    widget.addText(state.time, 14),
+                )({ width: 32, height: 20 });
+            }
+        },
+        {
+            x: 6,
+            y: 0,
+            state: {
+                temperature: '10`C'
+            },
+            effect(state) {
+                setTimeout(async () => {
+                    const weather: any = await fetchWeather();
+                    state.temperature = weather.current.temp_c;
+                    console.log(weather);
+                }, 15_000);
+            }, async render(state) {
+                return await fp.asyncPipe(
+                    widget.create,
+                    widget.addText(` ${state.temperature}\`C`, 14)
+                )({ width: 32, height: 20 });
+            }
+        },
+        {
+            x: 2,
+            y: 0,
+            state: {},
+            effect() { },
+            async render() {
+                return await widget.createImage('oc_moon.png');
+            }
+        }
+    ]);
 })();

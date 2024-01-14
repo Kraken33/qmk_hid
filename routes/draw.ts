@@ -19,7 +19,6 @@ router.post ('/', async function(req: Request<{}, {}, UInt8t[]>, res, next) {
     flatten,
     hid.send
   )(body);
-  console.log(result );
   res.send('respond with a resource');
 });
 
