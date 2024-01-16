@@ -16,25 +16,32 @@ const sendWidget = (x: UInt8t, y: UInt8t, size: number) => pipe(
     hid.send
 );
 
-const create = (screenDefinition: Array<{ x: number; y: number; state: Record<string, any>; effect(s: Record<string, any>): void; render(s: Record<string, any>): Promise<Widget> }>) => {
-    const screenE = screenDefinition.map((widget) => ({
-        ...widget, __state: new Proxy(widget.state, {
-            set(ob, name, value) {
-                const ref = Reflect.set(ob, name, value);
-                widget.render(ob).then((widgetResult)=>{
+const create = (screenDefinition: Array<{ x: number; y: number; initialState: Record<string, any>; effect(s: Record<string, any>, up: (p: Record<string, any>)=> Record<string, any>): Promise<void> | void; render(s: Record<string, any>): Promise<Widget> }>) => {
+    const screenRoot = screenDefinition.map((widget) => {
+        const widgetRoot = {
+            ...widget, currentState: widget.initialState, update: (state: any) => {
+                const nextState = {
+                    ...widgetRoot.currentState,
+                    ...state,
+                }
+
+                widgetRoot.currentState = nextState;
+                widget.render(nextState).then((widgetResult) => {
                     const widgetInBytes = imageModule.parse(widgetResult);
                     sendWidget(widget.x as UInt8t, widget.y as UInt8t, widgetInBytes.length)(widgetInBytes);
                 });
 
-                return ref;
+                return nextState;
             }
-        })
-    }));
+        }
 
-    screenE.forEach(async (widget)=>{
-        widget.effect(widget.__state);
-        const widgetInBytes = imageModule.parse(await widget.render(widget.state));
-        sendWidget(widget.x as UInt8t, widget.y as UInt8t, widgetInBytes.length)(widgetInBytes); 
+        return widgetRoot;
+    });
+
+    screenRoot.forEach(async (widget) => {
+        await widget.effect(widget.currentState, widget.update);
+        const widgetInBytes = imageModule.parse(await widget.render(widget.currentState));
+        sendWidget(widget.x as UInt8t, widget.y as UInt8t, widgetInBytes.length)(widgetInBytes);
     })
 }
 

@@ -19,7 +19,7 @@ const scale = (w: number)=>(widget: Widget)=>{
 }
 
 const addText = (text: string, size: number = 10) => async (widget: Widget) => {
-    const font = await Jimp.loadFont(join(__dirname, `../assets/fonts/Pixolletta${size}.fnt`));
+    const font = await Jimp.loadFont((Jimp as any)[`FONT_SANS_${size}_BLACK` as any]);
 
     return new Promise((res, rej) => {
         const width = Jimp.measureText(font, text);
