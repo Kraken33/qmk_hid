@@ -1,4 +1,3 @@
-import { QMKCommand } from "./command";
 import { UInt8t } from "./common";
 
 export type Chunk = Array<UInt8t>;

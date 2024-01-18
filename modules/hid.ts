@@ -5,7 +5,6 @@ import { intervals } from "./timer";
 
 const send = (bytesPackage: UInt8t[]) => {
     const kbd = keyboard.use();
-    console.log(bytesPackage, bytesPackage.length);
     try {
         kbd.write(bytesPackage);
     } catch (e) {

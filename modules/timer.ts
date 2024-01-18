@@ -39,3 +39,8 @@ export const createIntervalPool = () => {
 
 export const intervals = createIntervalPool();
 
+export const repeatEvery = (time: number) => (fn: () => void | Promise<any>) => {
+    fn();
+    intervals.set(fn, time);
+}
+

@@ -1,6 +1,8 @@
 import Jimp from "jimp";
 import { join } from "node:path";
 import { Widget } from "../types/widget";
+// @ts-ignore: Unreachable code error
+import imageModule from './image';
 
 const create = ({ width, height }: { width: number, height: number }) => {
     return Jimp.read(width, height);
@@ -18,8 +20,12 @@ const scale = (w: number)=>(widget: Widget)=>{
     return widget.scale(w);
 }
 
+const rotate = (deg: number)=>(widget: Widget)=>{
+    return widget.rotate(deg);
+}
+
 const addText = (text: string, size: number = 10) => async (widget: Widget) => {
-    const font = await Jimp.loadFont((Jimp as any)[`FONT_SANS_${size}_BLACK` as any]);
+    const font = await Jimp.loadFont(join(__dirname, '../assets/fonts/PixelOperator17/index.fnt'));
 
     return new Promise((res, rej) => {
         const width = Jimp.measureText(font, text);
@@ -38,7 +44,9 @@ const addText = (text: string, size: number = 10) => async (widget: Widget) => {
             },
             width,
             height,
-            (err, image) => res(image)
+            (err, image) => {
+                res(image)
+            }
         )
     });
 }
@@ -47,11 +55,15 @@ const combine = (widget: Widget, x: number, y: number) => (targetWidget: Widget)
     return targetWidget.blit(widget, x, y);
 }
 
-export default {
+const convert2Bytes = (widget: Widget) => imageModule.parse(widget);
+
+export const widget = {
     create,
     createImage,
     addText,
     combine,
     resize,
     scale,
+    convert2Bytes,
+    rotate,
 }
