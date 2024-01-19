@@ -24,6 +24,10 @@ export const createIntervalPool = () => {
                 }
             });
         },
+        stop() {
+            this.pause();
+            intervals = [];
+        },
         resume() {
             intervals = intervals.map(({ time, cb }) => {
                 const interval = setInterval(cb, time);

@@ -1,6 +1,9 @@
 const HID = require("node-hid");
+const { intervals } = require("./timer");
+const EventEmitter = require('node:events');
 
 let kbd = null;
+let status = 0;
 
 const checkDeviceHasBeenConnected = () => {
     const devices = HID.devices();
@@ -60,7 +63,20 @@ function connect(device) {
         console.log(devices)
     }
 
-    kbd = new HID.HID(device.path);
+    const keyboardHid = new HID.HID(device.path);
+
+    kbd = Object.create(keyboardHid);
+    Object.assign(kbd, new EventEmitter());
+
+    kbd.write =  (...args)=> {
+        try {
+            keyboardHid.write(...args);
+        } catch (e) {
+            status = 0;
+            kbd.emit('disconnect');
+        }
+    }
+    status = 1;
 
     console.log(`connected to ${device.manufacturer} ${device.product}`);
 
@@ -68,23 +84,22 @@ function connect(device) {
 }
 
 function use() {
-        return kbd;
+    return kbd;
 }
 
-function waitForDevice() {
-    return new Promise((res, rej) => {
-        const interval = setInterval(() => {
-            const device = checkDeviceHasBeenConnected();
-            if (device) {
-                clearInterval(interval);
-                const kbd = connect(device);
-                kbd.on('error', ()=>{
-                    console.log('error');
-                });
-                res(device);
-            }
-        }, 5000);
-    });
+function waitForDevice(cb) {
+    const interval = setInterval(() => {
+        const device = checkDeviceHasBeenConnected();
+        if (device) {
+            clearInterval(interval);
+            const kbd = connect(device);
+            kbd.on('disconnect', ()=>{
+                intervals.stop();
+                waitForDevice(cb);
+            });
+            cb(device);
+        }
+    }, 5000);
 }
 
 exports.keyboard = {

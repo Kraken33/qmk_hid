@@ -5,14 +5,7 @@ import { intervals } from "./timer";
 
 const send = (bytesPackage: UInt8t[]) => {
     const kbd = keyboard.use();
-    try {
-        kbd.write(bytesPackage);
-    } catch (e) {
-        intervals.pause();
-        keyboard.waitForDevice().then(() => {
-            intervals.resume();
-        });
-    }
+    kbd.write(bytesPackage);
 }
 
 const resume = () => {

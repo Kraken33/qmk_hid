@@ -89,5 +89,5 @@ async function main() {
 
 };
 
-keyboard.waitForDevice().then(main).catch(() => console.log('err'));
+keyboard.waitForDevice(main);
 
