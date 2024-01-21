@@ -6,6 +6,7 @@ import fp from './modules/fp';
 import { keyboard } from './modules/keyboard';
 import { repeatEvery } from './modules/timer';
 import { oled } from './modules/oled';
+import hid from './modules/hid';
 
 dotenv.config();
 
