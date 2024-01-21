@@ -19,7 +19,7 @@ type WeatherAPIResponse = {
     },
 }
 
-const weatherIcons: any ={
+const weatherIcons: any = {
     1003: 'pc',
     1000: 'clear'
 };
@@ -29,14 +29,16 @@ async function main() {
         return await ((await fetch(`http://api.weatherapi.com/v1/current.json?key=${process.env.WEATHER_API_KEY}&q=${process.env.WEATHER_API_LOCATION}&aqi=no`)).json()) as WeatherAPIResponse;
     }
 
-    repeatEvery(60_000)(
+    repeatEvery(60_000)( 
         fp.asyncPipe(
             async () => {
                 const time = dayjs(Date.now()).format('HH:mm');
                 const timeWidget = fp.asyncPipe(
                     widget.create,
-                    widget.addText(time, 12),
-                )({width: 32, height: 24})
+                    widget.addText(time, {size: 17}),
+                )({ width: 32, height: 22 });
+
+                console.log(timeWidget, 'timeWidget');
 
                 return await timeWidget;
             },
@@ -52,7 +54,7 @@ async function main() {
                 widget.combine(
                     await widget.createImage('qr.png'), 5, 0
                 )
-            )({ width: 32, height:25 });;
+            )({ width: 32, height: 25 });;
         },
         widget.convert2Bytes,
         oled.render(8, 0)
@@ -63,19 +65,21 @@ async function main() {
             async () => {
                 const weather = await fetchWeather();
 
-                const {isDay, temperature, iconCode} = {
+                const { isDay, temperature, iconCode } = {
                     isDay: weather.current.is_day,
                     temperature: weather.current.temp_c,
                     iconCode: weather.current.condition.code,
                 }
 
+                debugger;
+
                 const tempWidget = await fp.asyncPipe(
                     widget.create,
-                    widget.addText(`${temperature} C`, 16),
+                    widget.addText(`${temperature} C`, { size: 17 }),
                 )({ width: 32, height: 20 });
-        
-                const weatherConditionIcon = await widget.createImage('light_snow.png');//`${weatherIcons[state.iconCode]}_${state.isDay ? 'day' : 'night'}.png`);
-        
+
+                const weatherConditionIcon = await widget.createImage(weatherIcons[iconCode] ? `${weatherIcons[iconCode]}_${isDay ? 'day' : 'night'}.png` : 'light_snow.png');
+
                 return await fp.asyncPipe(
                     widget.create,
                     widget.combine(weatherConditionIcon, 0, 0),
