@@ -38,8 +38,6 @@ async function main() {
                     widget.addText(time, {size: 17}),
                 )({ width: 32, height: 22 });
 
-                console.log(timeWidget, 'timeWidget');
-
                 return await timeWidget;
             },
             widget.convert2Bytes,
