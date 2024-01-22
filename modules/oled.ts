@@ -17,15 +17,15 @@ const addOledBufferCommandId2Chunks = (chunks: QMK32BytePackage<QMKCommands.oled
     ));
 }
 
-const addRenderBufferCommandPackage = ([x, y, size]: [UInt8t, UInt8t, UInt8t[]]) => (chunks: QMK32BytePackage<QMKCommands.oledBuffer, QMKPackageBody>[]) => {
-    return concat<any>([bytes.fill2FixedSize(32)([QMKCommands.renderBuffer, x, y, ...size])])(chunks);
+const addRenderBufferCommandPackage = ([x, y, size, screenIndex]: [UInt8t, UInt8t, UInt8t[], UInt8t]) => (chunks: QMK32BytePackage<QMKCommands.oledBuffer, QMKPackageBody>[]) => {
+    return concat<any>([bytes.fill2FixedSize(32)([QMKCommands.renderBuffer, x, y, ...size, screenIndex])])(chunks);
 }
 
-const render = (x: UInt8t, y: UInt8t) => (oledBytes: Array<UInt8t>) => {
+const render = ({ x, y, screenIndex = 0 }: { x: UInt8t; y: UInt8t; screenIndex?: UInt8t }) => (oledBytes: Array<UInt8t>) => {
     pipe(
         bytes.chunk(31),
         addOledBufferCommandId2Chunks,
-        addRenderBufferCommandPackage([x, y, bytes.int2Bytes(oledBytes.length)]),
+        addRenderBufferCommandPackage([x, y, bytes.int2Bytes(oledBytes.length), screenIndex]),
         flatten,
         hid.send
     )(oledBytes)
