@@ -56,19 +56,19 @@ const checkDeviceHasBeenConnected = () => {
     return device;
 }
 
-function connect(device) {
+async function connect(device) {
     if (!device) {
         console.error('device not found (is the device connected? is raw HID enabled?)')
         console.error('following devices were detected:')
         console.log(devices)
     }
 
-    const keyboardHid = new HID.HID(device.path);
+    const keyboardHid = await HID.HIDAsync.open(device.path);
 
     kbd = Object.create(keyboardHid);
     Object.assign(kbd, new EventEmitter());
 
-    kbd.write =  (...args)=> {
+    kbd.write = (...args) => {
         try {
             keyboardHid.write(...args);
         } catch (e) {
@@ -88,12 +88,12 @@ function use() {
 }
 
 function waitForDevice(cb) {
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
         const device = checkDeviceHasBeenConnected();
         if (device) {
             clearInterval(interval);
-            const kbd = connect(device);
-            kbd.on('disconnect', ()=>{
+            const kbd = await connect(device);
+            kbd.on('disconnect', () => {
                 intervals.stop();
                 waitForDevice(cb);
             });

@@ -6,7 +6,6 @@ import fp from './modules/fp';
 import { keyboard } from './modules/keyboard';
 import { repeatEvery } from './modules/timer';
 import { oled } from './modules/oled';
-import hid from './modules/hid';
 
 dotenv.config();
 
@@ -43,7 +42,7 @@ async function main() {
             )({ width: 32, height: 32 });;
         },
         widget.convert2Bytes,
-        oled.render({ x: 15, y: 0, screenIndex: 1 })
+        oled.render({ x: 12, y: 0, screenIndex: 2 })
     ))
 
     repeatEvery(60_000)(
@@ -85,8 +84,6 @@ async function main() {
                     temperature: weather.current.temp_c,
                     iconCode: weather.current.condition.code,
                 }
-
-                debugger;
 
                 const tempWidget = await fp.asyncPipe(
                     widget.create,

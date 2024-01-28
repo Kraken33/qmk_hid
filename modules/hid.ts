@@ -1,11 +1,22 @@
 import { UInt8t } from "../types/common";
 // @ts-ignore: Unreachable code error
 import { keyboard } from "./keyboard.js";
-import { intervals } from "./timer";
+import { asyncFunctionsQueue } from './func';
 
-const send = (bytesPackage: UInt8t[]) => {
+const asyncQueue = asyncFunctionsQueue();
+
+const send = async (bytesPackage: UInt8t[]) => {
     const kbd = keyboard.use();
-    kbd.write(bytesPackage);
+    for (let i = 0; i < bytesPackage.length; i++) {
+        asyncQueue.add(async () => {
+            kbd.write(bytesPackage[i]);
+            const responseBuffer = await kbd.read(1000);
+            const [status] = new Uint8ClampedArray(responseBuffer);
+            if (status !== 200) {
+                throw new Error(`HID: Status error: ${status}`);
+            }
+        });
+    }
 }
 
 const resume = () => {
