@@ -1,22 +1,23 @@
-import fp from './fp';
-
 enum AsyncQueueStatues {
     paused,
     executing,
 }
 
+type AsyncFunction = () => Promise<void>;
+
 type AsyncFunctionsQueue = () => ({
     status: AsyncQueueStatues;
-    queueStack: Array<Promise<() => void>>;
-    add(fn: ()=>Promise<void>): Promise<void>;
+    queueStack: Array<AsyncFunction>;
+    add(fn: AsyncFunction): Promise<void>;
     exec(): Promise<void>;
+    clear(): void;
 })
 
-export const asyncFunctionsQueue: AsyncFunctionsQueue = () => {
+export const createAsyncQueue: AsyncFunctionsQueue = () => {
     return {
         status: 0,
         queueStack: [],
-        async add(fn: any) {
+        async add(fn) {
             this.queueStack.push(fn);
             if (this.status === 0) {
                 await this.exec();
@@ -24,9 +25,22 @@ export const asyncFunctionsQueue: AsyncFunctionsQueue = () => {
         },
         async exec() {
             this.status = 1;
-            await fp.arrayAsyncPipe(this.queueStack)();
+            for (let fn of this.queueStack) {
+                if (!this.status) {
+                    break;
+                }
+                await fn().catch((e) => {
+                    console.warn(e);
+                });
+            }
             this.queueStack = [];
             this.status = 0;
+        },
+        clear() {
+            this.status = 0;
+            this.queueStack = [];
         }
     }
 }
+
+export const asyncQueue = createAsyncQueue();

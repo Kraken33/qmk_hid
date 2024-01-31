@@ -6,6 +6,8 @@ import fp from './modules/fp';
 import { keyboard } from './modules/keyboard';
 import { repeatEvery } from './modules/timer';
 import { oled } from './modules/oled';
+import { asyncQueue } from './modules/func';
+import { intervals } from './modules/timer';
 
 dotenv.config();
 
@@ -33,17 +35,32 @@ async function main() {
     let frameId = 0;
     repeatEvery(100)(fp.asyncPipe(
         async () => {
-            frameId = frameId === 8 ? 0 : frameId;
-            return await fp.asyncPipe(
+            frameId = frameId === 31 ? 0 : frameId;
+            const frameNormalized = frameId < 10 ? '0' + frameId : frameId;
+            frameId++;
+            const text = fp.asyncPipe(
                 widget.create,
-                widget.combine(
-                    await widget.createImage(`./anim/${++frameId}.png`), 0, 0
-                )
-            )({ width: 32, height: 32 });;
+                widget.addText('IN LOVE WITH JS', { size: 12 }),
+                widget.rotate(90)
+            )({ width: 124, height: 32 });
+            return await widget.combine(await widget.createImage(`./hear/frame_${frameNormalized}_delay-0.03s.png`), 0, 0)(await text);
         },
         widget.convert2Bytes,
-        oled.render({ x: 12, y: 0, screenIndex: 2 })
+        oled.render({ x: 0, y: 0, screenIndex: 2 })
     ))
+
+    // repeatEvery(100000)(fp.asyncPipe(
+    //     async () => {
+    //         return await fp.asyncPipe(
+    //             widget.create,
+    //             widget.addText('I LOVE Corne', {fontName: 'Dot16'}),
+    //             widget.rotate(90),
+    //             widget.write('io.png')
+    //         )({ width: 120, height: 32 });;
+    //     },
+    //     widget.convert2Bytes,
+    //     oled.render({ x: 0, y: 0, screenIndex: 1 })
+    // ))
 
     repeatEvery(60_000)(
         fp.asyncPipe(
@@ -105,5 +122,11 @@ async function main() {
 
 };
 
-keyboard.waitForDevice(main);
+function onDisconnect() {
+        intervals.stop();
+        asyncQueue.clear();
+        keyboard.waitForDevice(main, onDisconnect);
+}
+
+keyboard.waitForDevice(main, onDisconnect);
 

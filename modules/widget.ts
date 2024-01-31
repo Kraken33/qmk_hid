@@ -24,8 +24,8 @@ const rotate = (deg: number) => (widget: Widget) => {
     return widget.rotate(deg);
 }
 
-const addText = (text: string, { size = 10, alignmentX = Jimp.HORIZONTAL_ALIGN_CENTER, alignmentY = Jimp.VERTICAL_ALIGN_MIDDLE }: { size?: number; alignmentX?: number; alignmentY?: number } = {}) => async (widget: Widget) => {
-    const font = await Jimp.loadFont(join(__dirname, `../assets/fonts/PixelOperator${size}/index.fnt`));
+const addText = (text: string, { size = 12, alignmentX = Jimp.HORIZONTAL_ALIGN_CENTER, alignmentY = Jimp.VERTICAL_ALIGN_MIDDLE, fontName }: { size?: number; alignmentX?: number; alignmentY?: number; fontName?: string; } = {}) => async (widget: Widget) => {
+    const font = await Jimp.loadFont(join(__dirname, `../assets/fonts/${fontName || `PixelOperator${size}`}/index.fnt`));
 
     return new Promise((res, rej) => {
         const width = Jimp.measureText(font, text);
@@ -57,6 +57,11 @@ const combine = (widget: Widget, x: number, y: number) => (targetWidget: Widget)
 
 const convert2Bytes = (widget: Widget) => imageModule.parse(widget);
 
+const write = (path: string)=>(widget: Widget)=>{
+    widget.writeAsync(path);
+    return widget;
+}
+
 export const widget = {
     create,
     createImage,
@@ -66,4 +71,5 @@ export const widget = {
     scale,
     convert2Bytes,
     rotate,
+    write
 }

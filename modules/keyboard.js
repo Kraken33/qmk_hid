@@ -1,9 +1,8 @@
 const HID = require("node-hid");
-const { intervals } = require("./timer");
 const EventEmitter = require('node:events');
+const { wait } = require("./wait");
 
 let kbd = null;
-let status = 0;
 
 const checkDeviceHasBeenConnected = () => {
     const devices = HID.devices();
@@ -69,14 +68,16 @@ async function connect(device) {
     Object.assign(kbd, new EventEmitter());
 
     kbd.write = (...args) => {
-        try {
-            keyboardHid.write(...args);
-        } catch (e) {
-            status = 0;
+        keyboardHid.write(...args).catch(() => {
             kbd.emit('disconnect');
-        }
+        });
     }
-    status = 1;
+
+    kbd.read = (...args) => {
+        return keyboardHid.read(...args).catch(() => {
+            kbd.emit('disconnect');
+        });
+    }
 
     console.log(`connected to ${device.manufacturer} ${device.product}`);
 
@@ -87,16 +88,16 @@ function use() {
     return kbd;
 }
 
-function waitForDevice(cb) {
+function waitForDevice(cb, onDisconnect) {
     const interval = setInterval(async () => {
         const device = checkDeviceHasBeenConnected();
         if (device) {
             clearInterval(interval);
             const kbd = await connect(device);
-            kbd.on('disconnect', () => {
-                intervals.stop();
-                waitForDevice(cb);
-            });
+            kbd.once('disconnect',onDisconnect);
+            // wait when second half connected to master
+            // @ToDo: add status when second half connect to master
+            await wait(2000);
             cb(device);
         }
     }, 5000);
