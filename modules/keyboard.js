@@ -98,6 +98,7 @@ function waitForDevice(cb, onDisconnect) {
             // wait when second half connected to master
             // @ToDo: add status when second half connect to master
             await wait(2000);
+            debugger;
             cb(device);
         }
     }, 5000);

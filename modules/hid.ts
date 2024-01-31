@@ -7,6 +7,7 @@ const send = async (bytesPackage: UInt8t[]) => {
     const kbd = keyboard.use();
     for (let i = 0; i < bytesPackage.length; i++) {
         asyncQueue.add(async () => {
+            debugger;
             kbd.write(bytesPackage[i]);
             const responseBuffer = await kbd.read(1000);
             const [status] = new Uint8ClampedArray(responseBuffer);

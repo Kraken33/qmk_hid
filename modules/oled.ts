@@ -33,8 +33,6 @@ const number2Bytes = (num: number)=>{
     return result;
 }
 
-console.log(number2Bytes(320));
-
 const addRenderBufferCommandPackage = ({ screenIndex, x, y, size }: { screenIndex: UInt8t; x: UInt8t; y: UInt8t; size: UInt8t }) => (chunks: QMK32BytePackage<QMKCommands.oledBuffer, QMKPackageBody>[]) => {
     return concat<any>([bytes.fill2FixedSize(32)([screenIndex, QMKCommands.renderBuffer, x, y, ...number2Bytes(size)])])(chunks);
 }

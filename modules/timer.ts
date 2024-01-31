@@ -45,6 +45,6 @@ export const intervals = createIntervalPool();
 
 export const repeatEvery = (time: number) => (fn: () => void | Promise<any>) => {
     fn();
-    intervals.set(fn, time);
+    return intervals.set(fn, time);
 }
 
