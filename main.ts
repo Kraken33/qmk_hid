@@ -37,7 +37,7 @@ async function main() {
         async () => {
             frameId = frameId === 31 ? 0 : frameId;
             const frameNormalized = frameId < 10 ? '0' + frameId : frameId;
-            frameId++;
+            frameId+=2;
             const text = fp.asyncPipe(
                 widget.create,
                 widget.addText('IN LOVE WITH JS', { size: 12 }),
