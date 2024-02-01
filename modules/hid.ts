@@ -1,6 +1,5 @@
 import { UInt8t } from "../types/common";
-// @ts-ignore: Unreachable code error
-import { keyboard } from "./keyboard.js";
+import { keyboard } from "./keyboard";
 import { asyncQueue } from './func';
 
 const send = async (bytesPackage: UInt8t[]) => {

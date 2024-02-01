@@ -1,8 +1,7 @@
 import Jimp from "jimp";
 import { join } from "node:path";
 import { Widget } from "../types/widget";
-// @ts-ignore: Unreachable code error
-import imageModule from './image';
+import { UInt8t } from "../types/common";
 
 const create = ({ width, height }: { width: number, height: number }) => {
     return Jimp.read(width, height);
@@ -55,12 +54,32 @@ const combine = (widget: Widget, x: number, y: number) => (targetWidget: Widget)
     return targetWidget.blit(widget, x, y);
 }
 
-const convert2Bytes = (widget: Widget) => imageModule.parse(widget);
-
 const write = (path: string)=>(widget: Widget)=>{
     widget.writeAsync(path);
     return widget;
 }
+
+const convert2Bytes = (widget: Widget)=> {
+    var w = widget.getWidth();
+    var h = widget.getHeight();
+  
+    let data: UInt8t[] = [];
+    const lines = ~~(h / 8);
+    let v: UInt8t;
+    for (var line = 0; line < lines; line++) {
+      for (var x = 0; x < w; x++) {
+        v = 0;
+        for (let i = 0; i < 8; i++) {
+          const y = line * 8 + i;
+          const b = widget.getPixelColor(x, y) > 127 ? 1 : 0;
+          v |= (b << i);
+        }
+        data.push(v as UInt8t);
+      }
+    }
+  
+    return data;
+  }
 
 export const widget = {
     create,
