@@ -1,6 +1,5 @@
 import pipe from 'lodash/fp/pipe';
 import dotenv from 'dotenv';
-// @ts-ignore: Unreachable code error
 import { keyboard } from './modules/keyboard';
 import { asyncQueue } from './modules/func';
 import { intervals } from './modules/timer';
