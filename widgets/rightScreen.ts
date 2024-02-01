@@ -1,5 +1,5 @@
 import flowRight from 'lodash/fp/flowRight';
-import fp from '../modules/fp';
+import { asyncPipe } from '../modules/fp';
 import { widget } from '../modules/widget';
 import { repeatEvery } from '../modules/timer';
 import { render, useState } from '../modules/renderUtils';
@@ -20,7 +20,7 @@ export const rightScreenWedget = flowRight(
         })
     }),
     render(async ({ frameId }) => {
-        const text = await fp.asyncPipe(
+        const text = await asyncPipe(
             widget.create,
             widget.addText('IN LOVE WITH TS', { size: 12 }),
             widget.rotate(90)

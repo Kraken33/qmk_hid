@@ -1,4 +1,4 @@
-const asyncPipe = (...fns: any)=> {
+export const asyncPipe = (...fns: any)=> {
     return async function(arg?: any) {
       let res = arg;
       for (let fn of fns) {
@@ -7,18 +7,3 @@ const asyncPipe = (...fns: any)=> {
       return res;
     }
   }
-
-  const arrayAsyncPipe = (fns: any)=> {
-    return async function(arg?: any) {
-      let res = arg;
-      for (let fn of fns) {
-        res = await fn(res);
-      }
-      return res;
-    }
-  }
-
-export default {
-    asyncPipe,
-    arrayAsyncPipe
-}

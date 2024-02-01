@@ -1,9 +1,9 @@
 import dayjs from 'dayjs';
-import fp from '../modules/fp';
 import flowRight from 'lodash/fp/flowRight';
 import { widget } from '../modules/widget';
 import { repeatEvery } from '../modules/timer';
-import {render, useState} from '../modules/renderUtils';
+import { render, useState } from '../modules/renderUtils';
+import { asyncPipe } from '../modules/fp';
 
 export const currentTimeWidget = flowRight(
     useState((setState: any) => {
@@ -14,7 +14,7 @@ export const currentTimeWidget = flowRight(
         })
     }),
     render(async ({ time }) => {
-        const timeWidget = fp.asyncPipe(
+        const timeWidget = asyncPipe(
             widget.create,
             widget.addText(time, { size: 17 }),
         )({ width: 32, height: 22 });

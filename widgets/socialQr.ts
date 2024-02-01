@@ -1,10 +1,10 @@
-import fp from '../modules/fp';
+import { asyncPipe } from '../modules/fp';
 import { widget } from '../modules/widget';
 import { render } from '../modules/renderUtils';
 
 export const socialQrWidget = render(
     async () => {
-        return await fp.asyncPipe(
+        return await asyncPipe(
             widget.create,
             widget.combine(
                 await widget.createImage('qr.png'), 5, 0

@@ -1,4 +1,4 @@
-import fp from '../modules/fp';
+import { asyncPipe } from '../modules/fp';
 import { widget } from '../modules/widget';
 import { repeatEvery } from '../modules/timer';
 import { render, useState } from '../modules/renderUtils';
@@ -38,14 +38,14 @@ export const weatherWidget = flowRight(
     }),
     render(async ({ isDay, temperature, iconCode }) => {
 
-        const tempWidget = await fp.asyncPipe(
+        const tempWidget = await asyncPipe(
             widget.create,
             widget.addText(`${temperature} C`, { size: 17 }),
         )({ width: 32, height: 20 });
 
         const weatherConditionIcon = await widget.createImage(weatherIcons[iconCode] ? `${weatherIcons[iconCode]}_${isDay ? 'day' : 'night'}.png` : 'light_snow.png');
 
-        return await fp.asyncPipe(
+        return await asyncPipe(
             widget.create,
             widget.combine(weatherConditionIcon, 0, 0),
             widget.combine(tempWidget, 2, 36),
