@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "bunx nodemon ./bin/www.ts",
+    "start": "npmx nodemon ./bin/www.ts",
     "init": "ts-node ./main.ts",
     "lint": "eslint ./**/*.ts",
     "format": "eslint ./**/*.ts --fix"
