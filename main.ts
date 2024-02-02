@@ -9,6 +9,8 @@ import { weatherWidget } from './widgets/weather';
 import { socialQrWidget } from './widgets/socialQr';
 import { rightScreenWedget } from './widgets/rightScreen';
 
+console.log(process.pid);
+
 dotenv.config();
 
 const registerWidgets = (widgets: Array<() => void>) => pipe(...widgets);

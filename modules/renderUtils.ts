@@ -17,3 +17,8 @@ export const render = <T = any>(currentWidget: (state: T) => Promise<Widget>, { 
     widget.convert2Bytes,
     oled.render({ x, y, screenIndex })
 )
+
+export const renderRaw = <T = any>(currentWidget: (state: T) => Promise<UInt8t[]>, { x, y, screenIndex }: { x: UInt8t, y: UInt8t, screenIndex: 1 | 2 }) => () => asyncPipe(
+    currentWidget,
+    oled.render({ x, y, screenIndex })
+)
