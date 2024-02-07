@@ -1,36 +1,26 @@
+import HID from 'node-hid';
+import EventEmitter from 'node:events';
+import { wait } from "./wait";
 import { UInt8t } from "../types/common";
-
-const HID = require("node-hid");
-const EventEmitter = require('node:events');
-const { wait } = require("./wait");
-
-type Device = { MANUFACTURER: string; PRODUCT: string };
-type NodeHidDevice = {
-    MANUFACTURER: string; PRODUCT: string;
-    vendorId: string;
-    productId: string;
-    usage: number;
-    usagePage: number;
-}
 
 let kbd: any = null;
 
 const checkDeviceHasBeenConnected = () => {
-    const devices: NodeHidDevice[] = HID.devices();
+    const devices = HID.devices();
 
     const DEFAULT_USAGE = {
         usage: 0x61,
         usagePage: 0xFF60
     }
-    const readableDeviceName = (spec: Device) =>
-        [spec.MANUFACTURER, spec.PRODUCT]
+    const readableDeviceName = (spec: HID.Device) =>
+        [spec.manufacturer, spec.product]
             .filter(Boolean)
             .join(' ')
 
     const getTargetDevice = (target: string) => {
         const targetRe = new RegExp(target.toLowerCase())
 
-        const targetDevice: Device[] = devices.filter((device: Device) =>
+        const targetDevice = devices.filter((device) =>
             readableDeviceName(device).toLowerCase().match(targetRe)
         )
 
@@ -53,12 +43,12 @@ const checkDeviceHasBeenConnected = () => {
     }
 
     const targetSpec = process.argv[2]
-    const target: any = targetSpec && getTargetDevice(targetSpec)
+    const target = targetSpec && getTargetDevice(targetSpec)
 
     const device = devices.find(d =>
         (target ?
-            (d.vendorId === target.VENDOR_ID &&
-                d.productId === target.PRODUCT_ID) : true)
+            (d.vendorId === target.vendorId &&
+                d.productId === target.productId) : true)
         &&
         d.usage === DEFAULT_USAGE.usage &&
         d.usagePage === DEFAULT_USAGE.usagePage);
@@ -66,12 +56,12 @@ const checkDeviceHasBeenConnected = () => {
     return device;
 }
 
-async function connect(device: any) {
+async function connect(device: HID.Device) {
     if (!device) {
         console.error('device not found (is the device connected? is raw HID enabled?)')
     }
 
-    const keyboardHid = await HID.HIDAsync.open(device.path);
+    const keyboardHid = await HID.HIDAsync.open(device.path as string);
 
     kbd = Object.create(keyboardHid);
     Object.assign(kbd as any, new EventEmitter());

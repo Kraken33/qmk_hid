@@ -22,7 +22,7 @@ const resume = () => {
     return kbd.resume();
 }
 
-export default {
+export const hid = {
     send,
     resume,
 }

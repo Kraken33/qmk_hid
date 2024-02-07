@@ -26,7 +26,7 @@ const int2Bytes = (num: number)=> {
     return [...[...new Array(4 - decimalBytes.length)].map(()=>0),...decimalBytes].reverse() as UInt8t[];
   }
 
-export default {
+export const bytes = {
     chunk,
     fill2FixedSize,
     int2Bytes,
