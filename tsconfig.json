@@ -1,0 +1,36 @@
+{
+    "compilerOptions": {
+      // `target` and `lib` match @tsconfig/bases for node14, since that's the oldest node LTS, so it's the oldest node we support
+      "lib": ["es2020"],
+      "rootDir": ".",
+      "outDir": "temp",
+      "tsBuildInfoFile": "temp/tsconfig.tsbuildinfo",
+      "noEmit": true,
+      "target": "ES2020",
+      "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+      "strict": true,
+      "declaration": true,
+      "sourceMap": true,
+      "inlineSources": true,
+      "types": ["node"],
+      "stripInternal": true,
+      "incremental": true,
+      "skipLibCheck": true,
+      "allowJs": true
+  
+      // Enable to assist in sanity-checking your changes to JS files, but note you will see many unrelated type errors!
+      // "checkJs": true,
+      // "noImplicitAny": false
+    },
+    "exclude": ["node_modules/**/*"],
+    "typedocOptions": {
+      "entryPoints": ["./main.ts"],
+      "readme": "none",
+      "out": "build",
+      "excludeTags": ["allof"],
+      "categorizeByGroup": false,
+      "categoryOrder": ["Basic", "REPL", "Transpiler", "ESM Loader", "Other"],
+      "defaultCategory": "Other"
+    }
+  }
