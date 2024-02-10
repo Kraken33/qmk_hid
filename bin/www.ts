@@ -6,7 +6,7 @@
 
 import app from '../app';
 import deb from 'debug';
-import http from 'http';
+import { createServer } from 'http';
 
 const debug = deb('qmk-hid:server');
 
@@ -21,7 +21,7 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+var server = createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.

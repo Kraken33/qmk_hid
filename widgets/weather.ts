@@ -2,7 +2,7 @@ import { asyncPipe } from '../modules/fp';
 import { widget } from '../modules/widget';
 import { repeatEvery } from '../modules/timer';
 import { render, useState } from '../modules/renderUtils';
-import flowRight from 'lodash/fp/flowRight';
+import { flowRight } from 'lodash/fp';
 
 type WeatherAPIResponse = {
     current: {

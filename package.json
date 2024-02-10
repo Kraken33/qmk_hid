@@ -6,7 +6,8 @@
     "start": "npmx nodemon ./bin/www.ts",
     "init": "ts-node ./main.ts",
     "lint": "eslint ./**/*.ts",
-    "format": "eslint ./**/*.ts --fix"
+    "format": "eslint ./**/*.ts --fix",
+    "tsc": "ts-node-transpile-only main.ts"
   },
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^6.18.1",

@@ -3,7 +3,7 @@ import logger from 'morgan';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import dayjs from 'dayjs';
 
-dayjs.extend(isoWeek)
+dayjs.extend(isoWeek as any)
 
 import drawRouter from './routes/draw';
 

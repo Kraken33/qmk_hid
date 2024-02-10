@@ -1,8 +1,7 @@
-import pipe from 'lodash/fp/pipe';
-import dotenv from 'dotenv';
+import { pipe } from 'lodash/fp';
+import { config as dotenvConfig } from 'dotenv';
+import { spawn } from 'node:child_process';
 import { keyboard } from './modules/keyboard';
-import { asyncQueue } from './modules/func';
-import { intervals } from './modules/timer';
 
 import { currentTimeWidget } from './widgets/currentTime';
 import { weatherWidget } from './widgets/weather';
@@ -11,7 +10,7 @@ import { rightScreenWedget } from './widgets/rightScreen';
 
 console.log(process.pid);
 
-dotenv.config();
+dotenvConfig();
 
 const registerWidgets = (widgets: Array<() => void>) => pipe(...widgets);
 
@@ -23,9 +22,15 @@ const execWidgets = registerWidgets([
 ]);
 
 function onDisconnect() {
-    intervals.stop();
-    asyncQueue.clear();
-    keyboard.waitForDevice(execWidgets, onDisconnect);
+    if (process.env.CPP_WATCHER_PWD) {
+        const childProcess = spawn(process.env.CPP_WATCHER_PWD, {
+            detached: true,
+            stdio: ['ignore', 'ignore', 'ignore']
+        });
+
+        childProcess.unref();
+    }
+    process.exit();
 }
 
 keyboard.waitForDevice(execWidgets, onDisconnect);

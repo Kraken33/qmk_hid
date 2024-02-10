@@ -87,20 +87,16 @@ function use() {
     return kbd;
 }
 
-function waitForDevice(cb: () => void, onDisconnect: () => void) {
-    const interval = setInterval(async () => {
+async function waitForDevice(cb: () => void, onDisconnect: () => void) {
         const device = checkDeviceHasBeenConnected();
         if (device) {
-            clearInterval(interval);
             const kbd = await connect(device);
             kbd.once('disconnect', onDisconnect);
             // wait when second half connected to master
             // @ToDo: add status when second half connect to master
             await wait(2000);
-            debugger;
             cb();
         }
-    }, 5000);
 }
 
 export const keyboard = {
