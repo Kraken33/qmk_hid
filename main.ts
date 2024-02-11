@@ -30,8 +30,11 @@ function onDisconnect() {
 
         childProcess.unref();
     }
+
     process.exit();
 }
+
+console.log(process.env.PID);
 
 keyboard.waitForDevice(execWidgets, onDisconnect);
 
