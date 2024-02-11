@@ -22,8 +22,8 @@ const execWidgets = registerWidgets([
 ]);
 
 function onDisconnect() {
-    if (process.env.CPP_WATCHER_PWD) {
-        const childProcess = spawn(process.env.CPP_WATCHER_PWD, {
+    if (process.env.CXX_WATCHER_PWD && process.env.CXXWATCHER) {
+        const childProcess = spawn(process.env.CXX_WATCHER_PWD, {
             detached: true,
             stdio: ['ignore', 'ignore', 'ignore']
         });

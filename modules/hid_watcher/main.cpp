@@ -110,5 +110,5 @@ int main(void) {
     hid_free_enumeration(devs);
     write_metadata(data);
     
-    system("cd /Users/vanluv/develop/keybrd/qmk_hid && npm run tsc");
+    system("cd /Users/vanluv/develop/keybrd/qmk_hid && CXXWATCHER=true npm run tsc");
 }
