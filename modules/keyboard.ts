@@ -8,8 +8,6 @@ let kbd: any = null;
 const checkDeviceHasBeenConnected = () => {
     const devices = HID.devices();
 
-    console.log(devices);
-
     const DEFAULT_USAGE = {
         usage: 0x61,
         usagePage: 0xFF60

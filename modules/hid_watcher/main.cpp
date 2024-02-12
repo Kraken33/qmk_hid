@@ -1,6 +1,7 @@
 #include <_types/_uint8_t.h>
 #include <nlohmann/json.hpp>
 #include "hidapi.h"
+#include <unistd.h>
 #include <chrono>
 #include <fstream>
 #include <iostream>
@@ -8,6 +9,7 @@
 #include <ostream>
 #include <string.h>
 #include <string>
+#include <sys/_types/_pid_t.h>
 #include <thread>
 
 #define DEVICE_C "/Users/vanluv/develop/keybrd/qmk_hid/device.json"
@@ -75,40 +77,49 @@ char* wchar_char(wchar_t *str1) {
 }
 
 int main(void) {
-    json data = read_metadata();
-    
-    struct hid_device_info *devs;
-    
-    hid_init();
-    
-    unsigned short vendor_id = static_cast<unsigned short>(data["vendor_id"]);
-    unsigned short product_id = static_cast<unsigned short>(data["product_id"]);
+    while(1) {
+        {
+            json data = read_metadata();
+            
+            struct hid_device_info *devs;
+            
+            hid_init();
+            
+            unsigned short vendor_id = static_cast<unsigned short>(data["vendor_id"]);
+            unsigned short product_id = static_cast<unsigned short>(data["product_id"]);
 
-    if (vendor_id == 0) {
-        devs = hid_enumerate(0x0, 0x0);
-        while (!find_keyboard_device(devs)) {
-            sleep_for(seconds(5));
-            devs = hid_enumerate(0x0, 0x0);
+            if (vendor_id == 0) {
+                devs = hid_enumerate(0x0, 0x0);
+                while (!find_keyboard_device(devs)) {
+                    sleep_for(seconds(5));
+                    devs = hid_enumerate(0x0, 0x0);
+                }
+
+                data["vendor_id"] = devs->vendor_id;
+                data["product_id"] = devs->product_id;
+                data["manufacturer_string"] = wchar_char(devs->manufacturer_string);
+                data["product_string"] =  wchar_char(devs->product_string);
+                data["path"] = devs->path;
+            } else {
+                uint8_t keyboard_had_been_finded = 0;
+                do {
+                    devs = hid_enumerate(vendor_id, product_id);
+                    keyboard_had_been_finded = find_keyboard_device(devs);
+                    if(!keyboard_had_been_finded)
+                        sleep_for(seconds(5));
+                } while (!keyboard_had_been_finded);
+                data["path"] = devs->path;
+            }
+            
+            hid_free_enumeration(devs);
+            write_metadata(data);
         }
-
-        data["vendor_id"] = devs->vendor_id;
-        data["product_id"] = devs->product_id;
-        data["manufacturer_string"] = wchar_char(devs->manufacturer_string);
-        data["product_string"] =  wchar_char(devs->product_string);
-        data["path"] = devs->path;
-    } else {
-        uint8_t keyboard_had_been_finded = 0;
-        do {
-            devs = hid_enumerate(vendor_id, product_id);
-            keyboard_had_been_finded = find_keyboard_device(devs);
-            if(!keyboard_had_been_finded)
-                sleep_for(seconds(5));
-        } while (!keyboard_had_been_finded);
-        data["path"] = devs->path;
+        pid_t pid = fork();
+        if(pid == 0) {
+            char* argument_list[] = {"ts-node-transpile-only", "/Users/vanluv/develop/keybrd/qmk_hid/main.ts", NULL};
+            execvp("ts-node-transpile-only", argument_list);
+        } else {
+            while (waitpid(0, NULL, 0) > 0);
+        }
     }
-    
-    hid_free_enumeration(devs);
-    write_metadata(data);
-    
-    system("cd /Users/vanluv/develop/keybrd/qmk_hid && CXXWATCHER=true npm run tsc");
 }
