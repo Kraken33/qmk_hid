@@ -3,3 +3,5 @@
 .env
 /assets/images
 /dist
+/modules/hid_watcher/build
+device.json

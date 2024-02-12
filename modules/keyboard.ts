@@ -61,7 +61,10 @@ async function connect(device: HID.Device) {
         console.error('device not found (is the device connected? is raw HID enabled?)')
     }
 
-    const keyboardHid = await HID.HIDAsync.open(device.path as string);
+    console.log(device);
+
+    const keyboardHid = device.path ? 
+        await HID.HIDAsync.open(device.path) : await HID.HIDAsync.open(device.vendorId, device.productId);
 
     kbd = Object.create(keyboardHid);
     Object.assign(kbd as any, new EventEmitter());
@@ -88,15 +91,15 @@ function use() {
 }
 
 async function waitForDevice(cb: () => void, onDisconnect: () => void) {
-        const device = checkDeviceHasBeenConnected();
-        if (device) {
-            const kbd = await connect(device);
-            kbd.once('disconnect', onDisconnect);
-            // wait when second half connected to master
-            // @ToDo: add status when second half connect to master
-            await wait(2000);
-            cb();
-        }
+    const device = checkDeviceHasBeenConnected(); //require('../device.json');
+    if (device) {
+        const kbd = await connect(device);
+        kbd.once('disconnect', onDisconnect);
+        // wait when second half connected to master
+        // @ToDo: add status when second half connect to master
+        await wait(2000);
+        cb();
+    }
 }
 
 export const keyboard = {
