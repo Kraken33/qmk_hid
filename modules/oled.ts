@@ -1,19 +1,8 @@
 import pipe from 'lodash/fp/pipe';
-import concat from 'lodash/fp/concat';
-import map from 'lodash/fp/map';
 
-import { QMK32BytePackage, QMKCommands, QMKPackageBody, QMKPackage } from "../types/command";
-import { bytes } from "./bytes";
+import { QMKCommands } from "../types/command";
 import { UInt8t } from '../types/common';
 import { hid } from './hid';
-
-const addOledBufferCommandId2Chunks = ({ screenIndex }: { screenIndex: UInt8t }) => (chunks: QMK32BytePackage<QMKCommands.oledBuffer, QMKPackageBody>[]): QMKPackage[] => {
-    const fillTo32ByteSize = bytes.fill2FixedSize(32);
-    return map(pipe(
-        concat([screenIndex, QMKCommands.oledBuffer]),
-        fillTo32ByteSize
-    ))(chunks);
-}
 
 const number2Bytes = (num: number) => {
     if (num < 255)
@@ -34,51 +23,50 @@ const number2Bytes = (num: number) => {
     return result;
 }
 
-const addRenderBufferCommandPackage = ({ screenIndex, x, y, size }: { screenIndex: UInt8t; x: UInt8t; y: UInt8t; size: UInt8t }) => (chunks: QMK32BytePackage<QMKCommands.oledBuffer, QMKPackageBody>[]) => {
-    return concat([bytes.fill2FixedSize(32)([screenIndex, QMKCommands.renderBuffer, x, y, ...number2Bytes(size)])])(chunks);
+const muttableiFllTo32Bytes = (arr: any[])=>{
+    if(arr.length%32 !== 0)
+        for(let i = arr.length%32; i < 32; i++){
+            arr.push(0);
+        }
+
+    return arr;
 }
 
+const muttableAddRenderBufferCommand = ({ screenIndex, x, y, size }: { screenIndex: UInt8t; x: UInt8t; y: UInt8t; size: number })=>(oledBytes: UInt8t[])=>{
+    const oledCommands = [];
+    oledCommands.push(screenIndex);
+    oledCommands.push(QMKCommands.renderBuffer);
+    oledCommands.push(x);
+    oledCommands.push(y);
+    const sizeBytes = number2Bytes(size);
+    for(let elem of sizeBytes)
+        oledCommands.push(elem);
 
-const render = ({ x, y, screenIndex = 1 }: { x: UInt8t; y: UInt8t; screenIndex?: UInt8t }) => (oledBytes: Array<UInt8t>) => {
-    const res = [];
+    return {oledCommands, oledBytes};
+}
 
-    const fillTo32Bytes = (arr: any[])=>{
-        if(arr.length%32 !== 0)
-            for(let i = arr.length%32; i < 32; i++){
-                arr.push(0);
-            }
-
-        return arr;
-    }
-
-    // console.log(oledBytes.length, 'len');
-    res.push(screenIndex);
-    res.push(QMKCommands.renderBuffer);
-    res.push(x);
-    res.push(y);
-    const size = number2Bytes(oledBytes.length);
-    size.forEach((elem)=>res.push(elem));
-    fillTo32Bytes(res);
+const mullableAddOledBufferCommands = ({ screenIndex }: { screenIndex: UInt8t }) => ({oledBytes, oledCommands}: {oledBytes: UInt8t[], oledCommands: UInt8t[]})=>{
+    muttableiFllTo32Bytes(oledCommands);
     for(let i = 0, j = 32; i < oledBytes.length; i++) {
         if(i % 30 === 0) {
-            res.push(screenIndex);
-            res.push(QMKCommands.oledBuffer);
+            oledCommands.push(screenIndex);
+            oledCommands.push(QMKCommands.oledBuffer);
             j+=2;
         }
-        res[j] = oledBytes[i];
+        oledCommands[j] = oledBytes[i];
         j++;
     }
-    fillTo32Bytes(res);
+    muttableiFllTo32Bytes(oledCommands);
 
-    hid.send(res as any);
+    return oledCommands;
+}
 
-    // console.log(res.length%32, 'res');
-    // pipe(
-    //     bytes.chunk(30),
-    //     addOledBufferCommandId2Chunks({ screenIndex }),
-    //     addRenderBufferCommandPackage({ x, y, size: oledBytes.length as UInt8t, screenIndex }),
-    //     hid.send
-    // )(oledBytes)
+const render = ({ x, y, screenIndex = 1 }: { x: UInt8t; y: UInt8t; screenIndex?: UInt8t }) => (oledBytes: Array<UInt8t>) => {
+    pipe(
+        muttableAddRenderBufferCommand({screenIndex, x, y, size: oledBytes.length}),
+        mullableAddOledBufferCommands({screenIndex}),
+        hid.send
+    )(oledBytes);
 };
 
 export const oled = {

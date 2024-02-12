@@ -1,55 +1,58 @@
 import { UInt8t } from "../types/common";
 import { keyboard } from "./keyboard";
-import { asyncQueue } from './func';
 
-const createHidSendQueue = ()=>{
+enum HIDQueueStatues {
+    paused,
+    executing,
+}
+
+type HIDSendQueue = {
+    status: HIDQueueStatues;
+    queueId: number;
+    bytesQueue: UInt8t[][];
+    add(b: UInt8t[]):void;
+    exec(): void;
+}
+
+const createHIDSendQueue = ():HIDSendQueue=>{
     return {
-        status: 0,
+        status: HIDQueueStatues.paused,
         queueId: 0,
-        bytesQueue: [] as any,
-        add(bytes: UInt8t[]) {
+        bytesQueue: [],
+        add(bytes) {
             this.bytesQueue.push(bytes);
-            if(this.status === 0){
+            if(this.status === 0)
                 this.exec();
-            }
         },
         async exec() {
             const kbd = keyboard.use()
-            this.status = 1;
+            this.status = HIDQueueStatues.executing;
             for(let i = 0, elem = this.bytesQueue[0]; elem; elem = this.bytesQueue[++i]){
-                for(let j = 0, pack: any = [], m = 0; j < elem.length; j++){
-                    pack[m++] = elem[j];
-                    if(m === 32) {
-                        // console.log(pack, 'pl');
+                for(let byteId = 0, pack: UInt8t[] = [], packId = 0; byteId < elem.length; byteId++){
+                    pack[packId++] = elem[byteId];
+                    if(packId === 32) {
                         kbd.write(pack);
                         await kbd.read(1000);
                         // const [status] = new Uint8ClampedArray(responseBuffer);
                         // if (status !== 200) {
                         //     throw new Error(`HID: Status error: ${status}`);
                         // }
-                        m = 0;
+                        packId = 0;
                     }
                 }
                 delete this.bytesQueue[i];
             }
             this.bytesQueue = [];
-            this.status = 0;
+            this.status = HIDQueueStatues.paused;
             this.queueId = 0;
         }
     }
 } 
 
-
-// for(let i = 0; i<200; i++) {
-//     bytesQueue.add([i as any]);
-// }
-
-// bytesQueue.exec();
-
-const bytesQueue = createHidSendQueue();
+const hidQueue = createHIDSendQueue();
 
 const send = async (bytesPackage: UInt8t[]) => {
-    bytesQueue.add(bytesPackage as any);
+    hidQueue.add(bytesPackage as any);
 }
 
 const resume = () => {
