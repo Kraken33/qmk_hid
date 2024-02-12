@@ -7,7 +7,8 @@
     "init": "ts-node ./main.ts",
     "lint": "eslint ./**/*.ts",
     "format": "eslint ./**/*.ts --fix",
-    "tsc": "ts-node-transpile-only main.ts"
+    "tsc": "ts-node-transpile-only main.ts",
+    "inspect": "node --inspect --require ts-node/register ./main.ts"
   },
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^6.18.1",

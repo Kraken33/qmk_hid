@@ -7,6 +7,7 @@ import { currentTimeWidget } from './widgets/currentTime';
 import { weatherWidget } from './widgets/weather';
 import { socialQrWidget } from './widgets/socialQr';
 import { rightScreenWedget } from './widgets/rightScreen';
+import { oled } from './modules/oled';
 
 console.log(process.pid);
 
@@ -15,21 +16,16 @@ dotenvConfig();
 const registerWidgets = (widgets: Array<() => void>) => pipe(...widgets);
 
 const execWidgets = registerWidgets([
-    currentTimeWidget,
-    socialQrWidget,
-    weatherWidget,
+    // currentTimeWidget,
+    // socialQrWidget,
+    // weatherWidget,
     rightScreenWedget,
 ]);
 
-function onDisconnect() {
-    if (process.env.CPP_WATCHER_PWD) {
-        const childProcess = spawn(process.env.CPP_WATCHER_PWD, {
-            detached: true,
-            stdio: ['ignore', 'ignore', 'ignore']
-        });
+// oled.render({x: 99, y: 99, screenIndex: 99})([0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0, 0, 0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0, 0, 1]);
 
-        childProcess.unref();
-    }
+function onDisconnect() {
+    console.error('Finish');
     process.exit();
 }
 
