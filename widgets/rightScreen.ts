@@ -8,7 +8,7 @@ import { renderRaw, useState } from '../modules/renderUtils';
 const getAnimationFrame = memoize(async ({ frameId }) => {
     const text = await asyncPipe(
         widget.create,
-        widget.addText('IN LOVE WITH TS', { size: 12 }),
+        widget.addText('IN LOVE WITH TS', { size: 16}),
         widget.rotate(90)
     )({ width: 124, height: 32 });
     return widget.convert2Bytes(widget.combine(await widget.createImage(`./hear/frame_${frameId}_delay-0.03s.png`), 0, 0)(text));
