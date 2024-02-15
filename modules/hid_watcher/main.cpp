@@ -34,16 +34,19 @@ uint8_t compare_wchar_char(wchar_t *str1, char *str2) {
     return 1;
 }
 
-uint8_t find_keyboard_device(hid_device_info *device) {
+hid_device_info *find_keyboard_device(hid_device_info *device) {
+    hid_device_info *dev = NULL;
     while (device) {
         if (compare_wchar_char(device->manufacturer_string, manufacturer_string) &&
             compare_wchar_char(device->product_string, product_string) && device->interface_number == 1) {
-            return 1;
+            dev = device;
+            return dev;
         }
         device = device->next;
+        cout << device->vendor_id << endl;
     }
     
-    return 0;
+    return dev;
 }
 
 void write_metadata(json data) {
@@ -57,8 +60,18 @@ void write_metadata(json data) {
 
 json read_metadata() {
     std::ifstream json_config(DEVICE_C);
-    json data = json::parse(json_config);
-    json_config.close();
+    json data;
+    try{
+        data = json::parse(json_config);
+    } catch(...) {
+        json_config.close();
+        data = {
+            {"vendor_id", 0},
+            {"product_id", 0}
+        };
+    }
+
+    cout << data << endl;
     
     return data;
 }
@@ -87,28 +100,29 @@ int main(void) {
             
             unsigned short vendor_id = static_cast<unsigned short>(data["vendor_id"]);
             unsigned short product_id = static_cast<unsigned short>(data["product_id"]);
+            hid_device_info *dev = NULL;
 
             if (vendor_id == 0) {
-                devs = hid_enumerate(0x0, 0x0);
-                while (!find_keyboard_device(devs)) {
-                    sleep_for(seconds(5));
+                do {
                     devs = hid_enumerate(0x0, 0x0);
-                }
+                    dev = find_keyboard_device(devs);
+                    if(!dev)
+                        sleep_for(seconds(5));
+                } while(!dev);
 
-                data["vendor_id"] = devs->vendor_id;
-                data["product_id"] = devs->product_id;
-                data["manufacturer_string"] = wchar_char(devs->manufacturer_string);
-                data["product_string"] =  wchar_char(devs->product_string);
-                data["path"] = devs->path;
+                data["vendor_id"] = dev->vendor_id;
+                data["product_id"] = dev->product_id;
+                data["manufacturer_string"] = wchar_char(dev->manufacturer_string);
+                data["product_string"] =  wchar_char(dev->product_string);
+                data["path"] = dev->path;
             } else {
-                uint8_t keyboard_had_been_finded = 0;
                 do {
                     devs = hid_enumerate(vendor_id, product_id);
-                    keyboard_had_been_finded = find_keyboard_device(devs);
-                    if(!keyboard_had_been_finded)
+                    dev = find_keyboard_device(devs);
+                    if(!dev)
                         sleep_for(seconds(5));
-                } while (!keyboard_had_been_finded);
-                data["path"] = devs->path;
+                } while (!dev);
+                data["path"] = dev->path;
             }
             
             hid_free_enumeration(devs);
