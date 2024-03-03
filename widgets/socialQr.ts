@@ -4,7 +4,7 @@ import { render } from '../modules/renderUtils';
 
 export const socialQrWidget = render(
     async () => {
-        return await asyncPipe(
+        return asyncPipe(
             widget.create,
             widget.combine(
                 await widget.createImage('qr.png'), 5, 0

@@ -23,7 +23,7 @@ const weatherIcons: any = {
 export const weatherWidget = flowRight(
     useState((setState) => {
         const fetchWeather = async () => {
-            return await ((await fetch(`http://api.weatherapi.com/v1/current.json?key=${process.env.WEATHER_API_KEY}&q=${process.env.WEATHER_API_LOCATION}&aqi=no`)).json()) as WeatherAPIResponse;
+            return (await fetch(`http://api.weatherapi.com/v1/current.json?key=${process.env.WEATHER_API_KEY}&q=${process.env.WEATHER_API_LOCATION}&aqi=no`)).json() as Promise<WeatherAPIResponse>;
         };
 
         repeatEvery(10 * 60_000)(async () => {
@@ -45,7 +45,7 @@ export const weatherWidget = flowRight(
 
         const weatherConditionIcon = await widget.createImage(weatherIcons[iconCode] ? `${weatherIcons[iconCode]}_${isDay ? 'day' : 'night'}.png` : 'light_snow.png');
 
-        return await asyncPipe(
+        return asyncPipe(
             widget.create,
             widget.combine(weatherConditionIcon, 0, 0),
             widget.combine(tempWidget, 2, 36),

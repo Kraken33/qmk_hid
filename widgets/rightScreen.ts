@@ -17,7 +17,6 @@ const getAnimationFrame = memoize(async ({ frameId }) => {
 export const rightScreenWedget = flowRight(
     useState((setState) => {
         repeatEvery(6000)(() => {
-            // debugger;
             let frameId = 0;
 
             const interval: any = setInterval(() => {

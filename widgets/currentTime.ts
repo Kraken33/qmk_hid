@@ -14,11 +14,9 @@ export const currentTimeWidget = flowRight(
         })
     }),
     render(async ({ time }) => {
-        const timeWidget = asyncPipe(
+        return asyncPipe(
             widget.create,
             widget.addText(time, { size: 17 }),
         )({ width: 32, height: 22 });
-
-        return await timeWidget;
     }, { x: 14, y: 0, screenIndex: 1 }),
 );

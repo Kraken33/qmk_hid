@@ -95,9 +95,9 @@ async function waitForDevice(cb: () => void, onDisconnect: () => void) {
     if (device) {
         const kbd = await connect(device);
         kbd.once('disconnect', onDisconnect);
-        // // wait when second half connected to master
-        // // @ToDo: add status when second half connect to master
-        // await wait(2000);
+        // wait when second half connected to master
+        // @ToDo: add status when second half connect to master
+        await wait(2000);
         cb();
     }
 }
